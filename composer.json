@@ -1,0 +1,49 @@
+{
+    "name": "imfx/cart",
+    "description": "Laravel Shopping Cart",
+    "keywords": [
+        "laravel",
+        "shopping",
+        "cart"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Felix Ayala",
+            "email": "hi@felixaya.la",
+            "homepage": "http://felixaya.la",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "illuminate/support": "^5.7.15 | 5.8.* | ^6.0 | ^7.0",
+        "illuminate/session": "^5.7.15 | 5.8.* | ^6.0 | ^7.0",
+        "illuminate/events": "^5.7.15 | 5.8.* | ^6.0 | ^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=5.4.3",
+        "mockery/mockery": "~0.9.0",
+        "orchestra/testbench": "~3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cart\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cart\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cart\\CartServiceProvider"
+            ],
+            "aliases": {
+                "Cart": "Cart\\Facades\\Cart"
+            }
+        }
+    }
+}
