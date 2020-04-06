@@ -48,7 +48,7 @@ class Cart
         $this->session = $session;
         $this->events = $events;
 
-        $this->instance(self::DEFAULT_INSTANCE);
+        $this->instance();
     }
 
     /**
@@ -59,11 +59,23 @@ class Cart
      */
     public function instance($instance = null)
     {
-        $instance = $instance ?: self::DEFAULT_INSTANCE;
+        if ($instance) {
+            $this->session->put('currentInstance', $instance ?: self::DEFAULT_INSTANCE);
+        }
 
+        $instance = $instance ?: self::DEFAULT_INSTANCE;
+        
+        
         $this->instance = sprintf('%s.%s', 'cart', $instance);
 
         return $this;
+    }
+
+    public function getInstance()
+    {
+        $instance = $this->session->get('currentInstance') ? sprintf('%s.%s', 'cart', $this->session->get('currentInstance')) : $this->instance;
+
+        return $instance;
     }
 
     /**
@@ -73,7 +85,9 @@ class Cart
      */
     public function currentInstance()
     {
-        return str_replace('cart.', '', $this->instance);
+        $currentInstance = $this->session->get('currentInstance') ?? str_replace('cart.', '', $this->getInstance());
+        
+        return $currentInstance;
     }
 
     /**
@@ -111,7 +125,7 @@ class Cart
 
         $this->events->dispatch('cart.added', $cartItem);
 
-        $this->session->put($this->instance, $content);
+        $this->session->put($this->getInstance(), $content);
 
         return $cartItem;
     }
@@ -155,7 +169,7 @@ class Cart
 
         $this->events->dispatch('cart.updated', $cartItem);
 
-        $this->session->put($this->instance, $content);
+        $this->session->put($this->getInstance(), $content);
 
         return $cartItem;
     }
@@ -176,7 +190,7 @@ class Cart
 
         $this->events->dispatch('cart.removed', $cartItem);
 
-        $this->session->put($this->instance, $content);
+        $this->session->put($this->getInstance(), $content);
     }
 
     /**
@@ -202,7 +216,7 @@ class Cart
      */
     public function destroy()
     {
-        $this->session->remove($this->instance);
+        $this->session->remove($this->getInstance());
     }
 
     /**
@@ -212,11 +226,11 @@ class Cart
      */
     public function content()
     {
-        if (is_null($this->session->get($this->instance))) {
+        if (is_null($this->session->get($this->getInstance()))) {
             return new Collection([]);
         }
 
-        return $this->session->get($this->instance);
+        return $this->session->get($this->getInstance());
     }
 
     /**
@@ -322,7 +336,7 @@ class Cart
 
         $content->put($cartItem->rowId, $cartItem);
 
-        $this->session->put($this->instance, $content);
+        $this->session->put($this->getInstance(), $content);
     }
 
     /**
@@ -342,7 +356,7 @@ class Cart
 
         $content->put($cartItem->rowId, $cartItem);
 
-        $this->session->put($this->instance, $content);
+        $this->session->put($this->getInstance(), $content);
     }
 
     /**
@@ -403,7 +417,7 @@ class Cart
 
         $this->events->dispatch('cart.restored');
 
-        $this->session->put($this->instance, $content);
+        $this->session->put($this->getInstance(), $content);
 
         $this->instance($currentInstance);
 
@@ -455,8 +469,8 @@ class Cart
      */
     protected function getContent()
     {
-        $content = $this->session->has($this->instance)
-            ? $this->session->get($this->instance)
+        $content = $this->session->has($this->getInstance())
+            ? $this->session->get($this->getInstance())
             : new Collection;
 
         return $content;
