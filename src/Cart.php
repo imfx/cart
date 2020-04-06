@@ -242,7 +242,7 @@ class Cart
     {
         $content = $this->getContent();
 
-        return $content->count();
+        return $content->sum('qty');
     }
 
     /**
