@@ -30,7 +30,7 @@ class CartItemTest extends TestCase
             'name' => 'Some item',
             'price' => 10.00,
             'rowId' => '07d5da5550494c62daf9993cf954303f',
-            'qty' => 2,
+            'quantity' => 2,
             'options' => [
                 'size' => 'XL',
                 'color' => 'red'
@@ -49,7 +49,7 @@ class CartItemTest extends TestCase
 
         $this->assertJson($cartItem->toJson());
 
-        $json = '{"rowId":"07d5da5550494c62daf9993cf954303f","id":1,"name":"Some item","qty":2,"price":10,"options":{"size":"XL","color":"red"},"tax":"0.00","isSaved":false,"subtotal":"20.00"}';
+        $json = '{"rowId":"07d5da5550494c62daf9993cf954303f","id":1,"name":"Some item","quantity":2,"price":10,"options":{"size":"XL","color":"red"},"tax":"0.00","isSaved":false,"subtotal":"20.00"}';
 
         $this->assertEquals($json, $cartItem->toJson());
     }

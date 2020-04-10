@@ -29,7 +29,7 @@ class CartItem implements Arrayable, Jsonable
      *
      * @var int|float
      */
-    public $qty;
+    public $quantity;
 
     /**
      * The name of the cart item.
@@ -183,14 +183,15 @@ class CartItem implements Arrayable, Jsonable
     /**
      * Set the quantity for this cart item.
      *
-     * @param int|float $qty
+     * @param int|float $quantity
      */
-    public function setQuantity($qty)
+    public function setQuantity($quantity)
     {
-        if(empty($qty) || ! is_numeric($qty))
+        if (empty($quantity) || ! is_numeric($quantity)) {
             throw new \InvalidArgumentException('Please supply a valid quantity.');
+        }
 
-        $this->qty = $qty;
+        $this->quantity = $quantity;
     }
 
     /**
@@ -199,12 +200,13 @@ class CartItem implements Arrayable, Jsonable
      * @param \Cart\Contracts\Buyable $item
      * @return void
      */
-    public function updateFromBuyable(Buyable $item)
+    public function updateFromBuyable(Buyable $item, array $options = [])
     {
         $this->id       = $item->getBuyableIdentifier($this->options);
         $this->name     = $item->getBuyableDescription($this->options);
         $this->price    = $item->getBuyablePrice($this->options);
         $this->priceTax = $this->price + $this->tax;
+        $this->options  = new CartItemOptions($options);
     }
 
     /**
@@ -216,7 +218,7 @@ class CartItem implements Arrayable, Jsonable
     public function updateFromArray(array $attributes)
     {
         $this->id       = Arr::get($attributes, 'id', $this->id);
-        $this->qty      = Arr::get($attributes, 'qty', $this->qty);
+        $this->quantity = Arr::get($attributes, 'quantity', $this->quantity);
         $this->name     = Arr::get($attributes, 'name', $this->name);
         $this->price    = Arr::get($attributes, 'price', $this->price);
         $this->priceTax = $this->price + $this->tax;
@@ -272,7 +274,7 @@ class CartItem implements Arrayable, Jsonable
      */
     public function __get($attribute)
     {
-        if(property_exists($this, $attribute)) {
+        if (property_exists($this, $attribute)) {
             return $this->{$attribute};
         }
 
@@ -281,11 +283,11 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'subtotal') {
-            return number_format(($this->qty * $this->price), 2, '.', '');
+            return number_format(($this->quantity * $this->price), 2, '.', '');
         }
 
         if ($attribute === 'total') {
-            return number_format(($this->qty * $this->priceTax), 2, '.', '');
+            return number_format(($this->quantity * $this->priceTax), 2, '.', '');
         }
 
         if ($attribute === 'tax') {
@@ -293,10 +295,10 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'taxTotal') {
-            return number_format(($this->tax * $this->qty), 2, '.', '');
+            return number_format(($this->tax * $this->quantity), 2, '.', '');
         }
 
-        if($attribute === 'model' && isset($this->associatedModel)) {
+        if ($attribute === 'model' && isset($this->associatedModel)) {
             return with(new $this->associatedModel)->find($this->id);
         }
 
@@ -367,11 +369,11 @@ class CartItem implements Arrayable, Jsonable
             'rowId'    => $this->rowId,
             'id'       => $this->id,
             'name'     => $this->name,
-            'qty'      => $this->qty,
+            'quantity' => $this->quantity,
             'price'    => $this->price,
             'options'  => $this->options->toArray(),
             'tax'      => $this->tax,
-            'isSaved'      => $this->isSaved,
+            'isSaved'  => $this->isSaved,
             'subtotal' => $this->subtotal
         ];
     }
@@ -398,15 +400,15 @@ class CartItem implements Arrayable, Jsonable
      */
     private function numberFormat($value, $decimals = null, $decimalPoint = null, $thousandSeperator = null)
     {
-        if (is_null($decimals)){
+        if (is_null($decimals)) {
             $decimals = is_null(config('cart.format.decimals')) ? 2 : config('cart.format.decimals');
         }
 
-        if (is_null($decimalPoint)){
+        if (is_null($decimalPoint)) {
             $decimalPoint = is_null(config('cart.format.decimal_point')) ? '.' : config('cart.format.decimal_point');
         }
 
-        if (is_null($thousandSeperator)){
+        if (is_null($thousandSeperator)) {
             $thousandSeperator = is_null(config('cart.format.thousand_seperator')) ? ',' : config('cart.format.thousand_seperator');
         }
 

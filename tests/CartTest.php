@@ -166,7 +166,7 @@ class CartTest extends TestCase
 
         $cart = $this->getCart();
 
-        $cart->add(['id' => 1, 'name' => 'Test item', 'qty' => 1, 'price' => 10.00]);
+        $cart->add(['id' => 1, 'name' => 'Test item', 'quantity' => 1, 'price' => 10.00]);
 
         $this->assertEquals(1, $cart->count());
 
@@ -181,8 +181,8 @@ class CartTest extends TestCase
         $cart = $this->getCart();
 
         $cart->add([
-            ['id' => 1, 'name' => 'Test item 1', 'qty' => 1, 'price' => 10.00],
-            ['id' => 2, 'name' => 'Test item 2', 'qty' => 1, 'price' => 10.00]
+            ['id' => 1, 'name' => 'Test item 1', 'quantity' => 1, 'price' => 10.00],
+            ['id' => 2, 'name' => 'Test item 2', 'quantity' => 1, 'price' => 10.00]
         ]);
 
         $this->assertEquals(2, $cart->count());
@@ -483,7 +483,7 @@ class CartTest extends TestCase
                 'rowId' => '027c91341fd5cf4d2579b49c4b6a90da',
                 'id' => 1,
                 'name' => 'Item name',
-                'qty' => 1,
+                'quantity' => 1,
                 'price' => 10.00,
                 'tax' => 2.10,
                 'subtotal' => 10.0,
@@ -494,7 +494,7 @@ class CartTest extends TestCase
                 'rowId' => '370d08585360f5c568b18d1f2e4ca1df',
                 'id' => 2,
                 'name' => 'Item name',
-                'qty' => 1,
+                'quantity' => 1,
                 'price' => 10.00,
                 'tax' => 2.10,
                 'subtotal' => 10.0,

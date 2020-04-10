@@ -66,7 +66,7 @@ Cart::add('293ad', 'Product 1', 1, 9.99, ['size' => 'large'], 20);
 Maybe you prefer to add the item using an array? As long as the array contains the required keys, you can pass it to the method. The options key is optional.
 
 ```php
-Cart::add(['id' => '293ad', 'name' => 'Product 1', 'qty' => 1, 'price' => 9.99, 'options' => ['size' => 'large']]);
+Cart::add(['id' => '293ad', 'name' => 'Product 1', 'quantity' => 1, 'price' => 9.99, 'options' => ['size' => 'large']]);
 ```
 
 New in version 2 of the package is the possibility to work with the [Buyable](#buyable) interface. The way this works is that you have a model implement the `Buyable` interface, which will make you implement a few methods so the package knows how to get the id, name and price from your model. 
@@ -93,8 +93,8 @@ You can just pass the `add()` method an array of arrays, or an array of Buyables
 
 ```php
 Cart::add([
-  ['id' => '293ad', 'name' => 'Product 1', 'qty' => 1, 'price' => 10.00],
-  ['id' => '4832k', 'name' => 'Product 2', 'qty' => 1, 'price' => 10.00, 'options' => ['size' => 'large']]
+  ['id' => '293ad', 'name' => 'Product 1', 'quantity' => 1, 'price' => 10.00],
+  ['id' => '4832k', 'name' => 'Product 2', 'quantity' => 1, 'price' => 10.00, 'options' => ['size' => 'large']]
 ]);
 
 Cart::add([$product1, $product2]);
@@ -324,7 +324,7 @@ Cart::add('293ad', 'Product 1', 1, 9.99, ['size' => 'large'])->associate('Produc
 
 // Now, when iterating over the content of the cart, you can access the model.
 foreach(Cart::content() as $row) {
-	echo 'You have ' . $row->qty . ' items of ' . $row->model->name . ' with description: "' . $row->model->description . '" in your cart.';
+	echo 'You have ' . $row->quantity . ' items of ' . $row->model->name . ' with description: "' . $row->model->description . '" in your cart.';
 }
 ```
 
@@ -446,7 +446,7 @@ Cart::add('1239ad0', 'Product 2', 2, 5.95, ['size' => 'large']);
    	<thead>
        	<tr>
            	<th>Product</th>
-           	<th>Qty</th>
+           	<th>Quantity</th>
            	<th>Price</th>
            	<th>Subtotal</th>
        	</tr>
@@ -461,7 +461,7 @@ Cart::add('1239ad0', 'Product 2', 2, 5.95, ['size' => 'large']);
                		<p><strong><?php echo $row->name; ?></strong></p>
                		<p><?php echo ($row->options->has('size') ? $row->options->size : ''); ?></p>
            		</td>
-           		<td><input type="text" value="<?php echo $row->qty; ?>"></td>
+           		<td><input type="text" value="<?php echo $row->quantity; ?>"></td>
            		<td>$<?php echo $row->price; ?></td>
            		<td>$<?php echo $row->total; ?></td>
        		</tr>
