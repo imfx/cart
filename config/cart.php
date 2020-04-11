@@ -50,20 +50,4 @@ return [
 
     'destroy_on_logout' => false,
 
-    /*
-    |--------------------------------------------------------------------------
-    | Default number format
-    |--------------------------------------------------------------------------
-    |
-    | This defaults will be used for the formated numbers if you don't
-    | set them in the method call.
-    |
-    */
-
-    'format' => [
-        'decimals'           => 0,
-        'decimal_point'      => ',',
-        'thousand_seperator' => '.'
-    ],
-
 ];

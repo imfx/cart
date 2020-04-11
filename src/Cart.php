@@ -3,14 +3,15 @@
 namespace Cart;
 
 use Closure;
+use Cart\Fee;
+use Cart\Contracts\Buyable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Session\SessionManager;
 use Illuminate\Database\DatabaseManager;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Support\Arr;
-use Cart\Contracts\Buyable;
-use Cart\Exceptions\UnknownModelException;
 use Cart\Exceptions\InvalidRowIDException;
+use Cart\Exceptions\UnknownModelException;
+use Illuminate\Contracts\Events\Dispatcher;
 use Cart\Exceptions\CartAlreadyStoredException;
 
 class Cart
@@ -34,7 +35,7 @@ class Cart
      *
      * @var string
      */
-    private $currentInstanceKey = 'current-instance';
+    private $currentInstanceKey = '_instance';
 
     /**
      * Cart constructor.
@@ -56,7 +57,10 @@ class Cart
      */
     public function setInstance($instance)
     {
-        $this->session->put($this->currentInstanceKey, $instance);
+        $this->session->put(
+            $this->getSessionKey($this->currentInstanceKey),
+            $instance
+        );
 
         return $this;
     }
@@ -68,7 +72,7 @@ class Cart
      */
     public function instance()
     {
-        return str_replace(config('cart.identifier') . '.', '', $this->currentInstance());
+        return str_replace(config('cart.identifier', 'cart') . '.', '', $this->currentInstance());
     }
 
     /**
@@ -78,9 +82,11 @@ class Cart
      */
     private function currentInstance()
     {
-        $instance = $this->session->get($this->currentInstanceKey) ?? 'default';
+        $instance = $this->session->get(
+            $this->getSessionKey($this->currentInstanceKey)
+        ) ?? 'default';
 
-        return sprintf('%s.%s', config('cart.identifier'), $instance);
+        return $this->getSessionKey($instance);
     }
 
     /**
@@ -217,7 +223,7 @@ class Cart
      */
     public function destroy()
     {
-        $this->session->remove($this->currentInstance());
+        $this->session->remove(config('cart.identifier', 'cart'));
     }
 
     /**
@@ -254,7 +260,7 @@ class Cart
      * @param string $thousandSeperator
      * @return string
      */
-    public function total($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function total()
     {
         $content = $this->getContent();
 
@@ -262,7 +268,9 @@ class Cart
             return $total + ($cartItem->quantity * $cartItem->priceTax);
         }, 0);
 
-        return $this->numberFormat($total, $decimals, $decimalPoint, $thousandSeperator);
+        $total += $this->totalFee();
+
+        return $total;
     }
 
     /**
@@ -273,7 +281,7 @@ class Cart
      * @param string $thousandSeperator
      * @return float
      */
-    public function tax($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function tax()
     {
         $content = $this->getContent();
 
@@ -281,18 +289,18 @@ class Cart
             return $tax + ($cartItem->quantity * $cartItem->tax);
         }, 0);
 
-        return $this->numberFormat($tax, $decimals, $decimalPoint, $thousandSeperator);
+        return $tax;
     }
 
     /**
-     * Get the subtotal (total - tax) of the items in the cart.
+     * Get the subTotal (total - tax) of the items in the cart.
      *
      * @param int    $decimals
      * @param string $decimalPoint
      * @param string $thousandSeperator
      * @return float
      */
-    public function subtotal($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function subTotal()
     {
         $content = $this->getContent();
 
@@ -300,7 +308,24 @@ class Cart
             return $subTotal + ($cartItem->quantity * $cartItem->price);
         }, 0);
 
-        return $this->numberFormat($subTotal, $decimals, $decimalPoint, $thousandSeperator);
+        return $subTotal;
+    }
+
+    public function totalFee()
+    {
+        $fees = $this->getFees();
+        $subTotal = $this->subTotal();
+
+        $totalFee = $fees->reduce(function ($totalFee, Fee $fee) use ($subTotal) {
+
+            if ($fee->isPercentage()) {
+                return $totalFee + (($subTotal * $fee->value()) / 100);
+            }
+
+            return $totalFee + $fee->value();
+        }, 0);
+
+        return $totalFee;
     }
 
     /**
@@ -431,23 +456,27 @@ class Cart
     }
 
     /**
-     * Magic method to make accessing the total, tax and subtotal properties possible.
+     * Magic method to make accessing the total, tax and subTotal properties possible.
      *
      * @param string $attribute
      * @return float|null
      */
     public function __get($attribute)
     {
-        if($attribute === 'total') {
+        if ($attribute === 'total') {
             return $this->total();
         }
 
-        if($attribute === 'tax') {
+        if ($attribute === 'tax') {
             return $this->tax();
         }
 
-        if($attribute === 'subtotal') {
-            return $this->subtotal();
+        if ($attribute === 'subTotal') {
+            return $this->subTotal();
+        }
+
+        if ($attribute === 'totalFee') {
+            return $this->totalFee();
         }
 
         return null;
@@ -561,35 +590,9 @@ class Cart
         return is_null($connection) ? config('database.default') : $connection;
     }
 
-    /**
-     * Get the Formated number
-     *
-     * @param $value
-     * @param $decimals
-     * @param $decimalPoint
-     * @param $thousandSeperator
-     * @return string
-     */
-    private function numberFormat($value, $decimals, $decimalPoint, $thousandSeperator)
-    {
-        if (is_null($decimals)) {
-            $decimals = is_null(config('cart.format.decimals')) ? 2 : config('cart.format.decimals');
-        }
-
-        if (is_null($decimalPoint)) {
-            $decimalPoint = is_null(config('cart.format.decimal_point')) ? '.' : config('cart.format.decimal_point');
-        }
-
-        if (is_null($thousandSeperator)) {
-            $thousandSeperator = is_null(config('cart.format.thousand_seperator')) ? ',' : config('cart.format.thousand_seperator');
-        }
-
-        return number_format($value, $decimals, $decimalPoint, $thousandSeperator);
-    }
-
     private function getMetaDataSessionKey()
     {
-        return sprintf('%s.%s', config('cart.identifier'), 'metadata');
+        return $this->getSessionKey('_metadata');
     }
 
     private function getSessionMetaData()
@@ -636,4 +639,55 @@ class Cart
 
         return $this->setSessionMetaData($metaData);
     }
+
+    private function getSessionKey($key)
+    {
+        return sprintf('%s.%s', config('cart.identifier', 'cart'), $key);
+    }
+
+    private function getFeesSessionKey()
+    {
+        return $this->getSessionKey('_fees');
+    }
+
+    public function getFees()
+    {
+        $key = $this->getFeesSessionKey();
+
+        return $this->session->get($key) ?? new Collection;
+    }
+
+    public function addFee($identifier, $title, $value)
+    {
+        $key = $this->getFeesSessionKey();
+
+        $fee = new Fee($identifier, $title, $value);
+
+        $fees = $this->getFees();
+
+        $fees->put($identifier, $fee);
+
+        return $this->session->put($key, $fees);
+    }
+
+    /**
+     * Remove the fee item with the given identifier.
+     *
+     * @param string $identifier
+     * @return void
+     */
+    public function removeFee($identifier = null)
+    {
+        $key = $this->getFeesSessionKey();
+
+        if (is_null($identifier)) {
+            return $this->session->remove($key);
+        }
+
+        $fees = $this->getFees();
+        $fees->pull($identifier);
+
+        return $this->session->put($key, $fees);
+    }
+
 }

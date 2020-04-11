@@ -108,9 +108,9 @@ class CartItem implements Arrayable, Jsonable
      * @param string $thousandSeperator
      * @return string
      */
-    public function price($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function price()
     {
-        return $this->numberFormat($this->price, $decimals, $decimalPoint, $thousandSeperator);
+        return $this->price;
     }
     
     /**
@@ -121,9 +121,9 @@ class CartItem implements Arrayable, Jsonable
      * @param string $thousandSeperator
      * @return string
      */
-    public function priceTax($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function priceTax()
     {
-        return $this->numberFormat($this->priceTax, $decimals, $decimalPoint, $thousandSeperator);
+        return $this->priceTax;
     }
 
     /**
@@ -135,9 +135,9 @@ class CartItem implements Arrayable, Jsonable
      * @param string $thousandSeperator
      * @return string
      */
-    public function subtotal($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function subTotal()
     {
-        return $this->numberFormat($this->subtotal, $decimals, $decimalPoint, $thousandSeperator);
+        return $this->subTotal;
     }
     
     /**
@@ -149,9 +149,9 @@ class CartItem implements Arrayable, Jsonable
      * @param string $thousandSeperator
      * @return string
      */
-    public function total($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function total()
     {
-        return $this->numberFormat($this->total, $decimals, $decimalPoint, $thousandSeperator);
+        return $this->total;
     }
 
     /**
@@ -162,9 +162,9 @@ class CartItem implements Arrayable, Jsonable
      * @param string $thousandSeperator
      * @return string
      */
-    public function tax($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function tax()
     {
-        return $this->numberFormat($this->tax, $decimals, $decimalPoint, $thousandSeperator);
+        return $this->tax;
     }
     
     /**
@@ -175,9 +175,9 @@ class CartItem implements Arrayable, Jsonable
      * @param string $thousandSeperator
      * @return string
      */
-    public function taxTotal($decimals = null, $decimalPoint = null, $thousandSeperator = null)
+    public function taxTotal()
     {
-        return $this->numberFormat($this->taxTotal, $decimals, $decimalPoint, $thousandSeperator);
+        return $this->taxTotal;
     }
 
     /**
@@ -279,23 +279,23 @@ class CartItem implements Arrayable, Jsonable
         }
 
         if ($attribute === 'priceTax') {
-            return number_format(($this->price + $this->tax), 2, '.', '');
+            return $this->price + $this->tax;
         }
 
-        if ($attribute === 'subtotal') {
-            return number_format(($this->quantity * $this->price), 2, '.', '');
+        if ($attribute === 'subTotal') {
+            return $this->quantity * $this->price;
         }
 
         if ($attribute === 'total') {
-            return number_format(($this->quantity * $this->priceTax), 2, '.', '');
+            return $this->quantity * $this->priceTax;
         }
 
         if ($attribute === 'tax') {
-            return number_format(($this->price * ($this->taxRate / 100)), 2, '.', '');
+            return $this->price * ($this->taxRate / 100);
         }
 
         if ($attribute === 'taxTotal') {
-            return number_format(($this->tax * $this->quantity), 2, '.', '');
+            return $this->tax * $this->quantity;
         }
 
         if ($attribute === 'model' && isset($this->associatedModel)) {
@@ -387,31 +387,5 @@ class CartItem implements Arrayable, Jsonable
     public function toJson($options = 0)
     {
         return json_encode($this->toArray(), $options);
-    }
-
-    /**
-     * Get the formatted number.
-     *
-     * @param float  $value
-     * @param int    $decimals
-     * @param string $decimalPoint
-     * @param string $thousandSeperator
-     * @return string
-     */
-    private function numberFormat($value, $decimals = null, $decimalPoint = null, $thousandSeperator = null)
-    {
-        if (is_null($decimals)) {
-            $decimals = is_null(config('cart.format.decimals')) ? 2 : config('cart.format.decimals');
-        }
-
-        if (is_null($decimalPoint)) {
-            $decimalPoint = is_null(config('cart.format.decimal_point')) ? '.' : config('cart.format.decimal_point');
-        }
-
-        if (is_null($thousandSeperator)) {
-            $thousandSeperator = is_null(config('cart.format.thousand_seperator')) ? ',' : config('cart.format.thousand_seperator');
-        }
-
-        return number_format($value, $decimals, $decimalPoint, $thousandSeperator);
     }
 }
