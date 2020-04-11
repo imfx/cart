@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Session\SessionManager;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Arr;
 use Cart\Contracts\Buyable;
 use Cart\Exceptions\UnknownModelException;
 use Cart\Exceptions\InvalidRowIDException;
@@ -34,13 +35,6 @@ class Cart
      * @var string
      */
     private $currentInstanceKey = 'current-instance';
-
-    /**
-     * Additional Fees.
-     * 
-     * @var \Illuminate\Support\Collection
-    */
-    private $additionalFees;
 
     /**
      * Cart constructor.
@@ -593,8 +587,53 @@ class Cart
         return number_format($value, $decimals, $decimalPoint, $thousandSeperator);
     }
 
-    public function setMeta($key, $data)
+    private function getMetaDataSessionKey()
     {
+        return sprintf('%s.%s', config('cart.identifier'), 'metadata');
+    }
+
+    private function getSessionMetaData()
+    {
+        $key = $this->getMetaDataSessionKey();
+
+        return $this->session->get($key) ?? [];
+    }
+
+    private function setSessionMetaData($data)
+    {
+        $key = $this->getMetaDataSessionKey();
         
+        return $this->session->put($key, $data);
+    }
+    
+    public function getMetaData($key = null)
+    {
+        $metaData = $this->getSessionMetaData();
+
+        return $key ? Arr::get($metaData, $key) : $metaData;
+    }
+
+    public function setMetaData($key, $data)
+    {
+        $metaData = $this->getSessionMetaData();
+        
+        $newMetaData = data_set($metaData, $key, $data);
+
+        return $this->setSessionMetaData(array_merge($metaData, $newMetaData));
+    }
+
+    public function removeMetaData($key = null)
+    {
+        if (is_null($key)) {
+            $key = $this->getMetaDataSessionKey();
+
+            return $this->session->remove($key);
+        }
+
+        $metaData = $this->getSessionMetaData();
+
+        Arr::forget($metaData, $key);
+
+        return $this->setSessionMetaData($metaData);
     }
 }
