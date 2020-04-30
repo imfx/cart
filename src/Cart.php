@@ -221,9 +221,17 @@ class Cart
      *
      * @return void
      */
-    public function destroy()
+    public function destroy($preserve = [])
     {
+        $metaData = $this->getSessionMetaData();
+
         $this->session->remove(config('cart.identifier', 'cart'));
+
+        collect($preserve)->each(function ($key) use ($metaData) {
+            if (isset($metaData[$key])) {
+                $this->setMetaData($key, $metaData[$key]);
+            }
+        });
     }
 
     /**
@@ -605,10 +613,10 @@ class Cart
     private function setSessionMetaData($data)
     {
         $key = $this->getMetaDataSessionKey();
-        
+
         return $this->session->put($key, $data);
     }
-    
+
     public function getMetaData($key = null)
     {
         $metaData = $this->getSessionMetaData();
@@ -619,7 +627,7 @@ class Cart
     public function setMetaData($key, $data)
     {
         $metaData = $this->getSessionMetaData();
-        
+
         $newMetaData = data_set($metaData, $key, $data);
 
         return $this->setSessionMetaData(array_merge($metaData, $newMetaData));
