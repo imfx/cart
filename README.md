@@ -8,7 +8,7 @@ Install the package through [Composer](http://getcomposer.org/).
 
 Run the Composer require command from the Terminal:
 
-    composer require imfx/cart
+    composer require zrkb/cart
     
 If you're using Laravel 5.5, this is all there is to do. 
 
@@ -16,11 +16,11 @@ Should you still be on version 5.4 of Laravel, the final steps for you are to ad
 
 Add a new line to the `providers` array:
 
-	Cart\CartServiceProvider::class
+    Cart\CartServiceProvider::class
 
 And optionally add a new line to the `aliases` array:
 
-	'Cart' => Cart\Facades\Cart::class,
+    'Cart' => Cart\Facades\Cart::class,
 
 Now you're ready to start using the cart in your application.
 
@@ -239,7 +239,7 @@ If you for instance want to find all items with an id of 1:
 
 ```php
 $cart->search(function ($cartItem, $rowId) {
-	return $cartItem->id === 1;
+    return $cartItem->id === 1;
 });
 ```
 
@@ -324,7 +324,7 @@ Cart::add('293ad', 'Product 1', 1, 9.99, ['size' => 'large'])->associate('Produc
 
 // Now, when iterating over the content of the cart, you can access the model.
 foreach(Cart::content() as $row) {
-	echo 'You have ' . $row->quantity . ' items of ' . $row->model->name . ' with description: "' . $row->model->description . '" in your cart.';
+    echo 'You have ' . $row->quantity . ' items of ' . $row->model->name . ' with description: "' . $row->model->description . '" in your cart.';
 }
 ```
 
@@ -443,49 +443,49 @@ Cart::add('1239ad0', 'Product 2', 2, 5.95, ['size' => 'large']);
 
 // Display the content in a View.
 <table>
-   	<thead>
-       	<tr>
-           	<th>Product</th>
-           	<th>Quantity</th>
-           	<th>Price</th>
-           	<th>Subtotal</th>
-       	</tr>
-   	</thead>
+       <thead>
+           <tr>
+               <th>Product</th>
+               <th>Quantity</th>
+               <th>Price</th>
+               <th>Subtotal</th>
+           </tr>
+       </thead>
 
-   	<tbody>
+       <tbody>
 
-   		<?php foreach(Cart::content() as $row) :?>
+           <?php foreach(Cart::content() as $row) :?>
 
-       		<tr>
-           		<td>
-               		<p><strong><?php echo $row->name; ?></strong></p>
-               		<p><?php echo ($row->options->has('size') ? $row->options->size : ''); ?></p>
-           		</td>
-           		<td><input type="text" value="<?php echo $row->quantity; ?>"></td>
-           		<td>$<?php echo $row->price; ?></td>
-           		<td>$<?php echo $row->total; ?></td>
-       		</tr>
+               <tr>
+                   <td>
+                       <p><strong><?php echo $row->name; ?></strong></p>
+                       <p><?php echo ($row->options->has('size') ? $row->options->size : ''); ?></p>
+                   </td>
+                   <td><input type="text" value="<?php echo $row->quantity; ?>"></td>
+                   <td>$<?php echo $row->price; ?></td>
+                   <td>$<?php echo $row->total; ?></td>
+               </tr>
 
-	   	<?php endforeach;?>
+           <?php endforeach;?>
 
-   	</tbody>
-   	
-   	<tfoot>
-   		<tr>
-   			<td colspan="2">&nbsp;</td>
-   			<td>Subtotal</td>
-   			<td><?php echo Cart::subtotal(); ?></td>
-   		</tr>
-   		<tr>
-   			<td colspan="2">&nbsp;</td>
-   			<td>Tax</td>
-   			<td><?php echo Cart::tax(); ?></td>
-   		</tr>
-   		<tr>
-   			<td colspan="2">&nbsp;</td>
-   			<td>Total</td>
-   			<td><?php echo Cart::total(); ?></td>
-   		</tr>
-   	</tfoot>
+       </tbody>
+       
+       <tfoot>
+           <tr>
+               <td colspan="2">&nbsp;</td>
+               <td>Subtotal</td>
+               <td><?php echo Cart::subtotal(); ?></td>
+           </tr>
+           <tr>
+               <td colspan="2">&nbsp;</td>
+               <td>Tax</td>
+               <td><?php echo Cart::tax(); ?></td>
+           </tr>
+           <tr>
+               <td colspan="2">&nbsp;</td>
+               <td>Total</td>
+               <td><?php echo Cart::total(); ?></td>
+           </tr>
+       </tfoot>
 </table>
 ```
