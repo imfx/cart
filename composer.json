@@ -10,9 +10,7 @@
     "authors": [
         {
             "name": "Felix Ayala",
-            "email": "hi@felixaya.la",
-            "homepage": "http://felixaya.la",
-            "role": "Developer"
+            "email": "felix1262@gmail.com"
         }
     ],
     "require": {
@@ -35,7 +33,6 @@
             "Cart\\Tests\\": "tests/"
         }
     },
-    "minimum-stability": "dev",
     "extra": {
         "laravel": {
             "providers": [
@@ -45,5 +42,10 @@
                 "Cart": "Cart\\Facades\\Cart"
             }
         }
-    }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
