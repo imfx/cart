@@ -261,6 +261,16 @@ class Cart
     }
 
     /**
+     * Returns true if the cart is empty.
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return $this->count() == 0;
+    }
+
+    /**
      * Get the total price of the items in the cart.
      *
      * @param int    $decimals
