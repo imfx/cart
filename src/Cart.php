@@ -627,11 +627,36 @@ class Cart
         return $this->session->put($key, $data);
     }
 
+    /**
+     * Get the metadata for the cart.
+     *
+     * @param string|null $key
+     * @return mixed
+     * @deprecated Use metadata() instead
+     */
     public function getMetaData($key = null)
     {
-        $metaData = $this->getSessionMetaData();
+        return $key ? $this->metadataFor(key: $key) : $this->metadata();
+    }
 
-        return $key ? Arr::get($metaData, $key) : $metaData;
+    /**
+     * Get the metadata for the cart.
+     *
+     * @return array
+     */
+    public function metadata(): array
+    {
+        return $this->getSessionMetaData();
+    }
+
+    /**
+     * Get the metadata for the given key.
+     *
+     * @return mixed
+     */
+    public function metadataFor(string $key)
+    {
+        return Arr::get($this->metadata(), $key);
     }
 
     public function setMetaData($key, $data)
@@ -707,5 +732,4 @@ class Cart
 
         return $this->session->put($key, $fees);
     }
-
 }
